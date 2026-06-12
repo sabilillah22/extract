@@ -38,7 +38,6 @@ python extract.py
        OOXML Extractor Tool
 ==================================================
 
-Enter the path to your .docx file:
 >
 ```
 
