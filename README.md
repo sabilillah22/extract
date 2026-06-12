@@ -1,52 +1,66 @@
 1) OOXML Structure Extractor
 
-A Python utility that unpacks a `.docx` file and pretty-prints its internal XML, making the underlying Office Open XML (OOXML) structure human-readable for inspection, debugging, or learning purposes.
+A Python utility that unpacks a `.docx` file and pretty prints its internal XML, making the underlying Office Open XML (OOXML) structure human-readable for inspection, debugging, or learning purposes. It also detects and reports the OOXML version used in the document.
+
 
 
 2) Background
 
 `.docx` files are ZIP archives containing a collection of XML files and binary assets (images, fonts, etc.). This tool extracts that structure and formats every `.xml` and `.rels` file with proper indentation, so you can read and explore the internals without a specialised editor.
 
+The tool also analyses the extracted `[Content_Types].xml` and internal folder structure to produce a structured version string (e.g. `5.1.1`) that identifies the ECMA-376 edition, conformance level, and document type of the file.
+
+
 
 3) Features
 
 - Extracts the full internal structure of any `.docx` file
-- Pretty prints all `.xml` and `.rels` files with 2-space indentation
+- Pretty-prints all `.xml` and `.rels` files with 2-space indentation
 - Preserves the original folder hierarchy (`word/`, `_rels/`, `docProps/`, etc.)
 - Writes binary assets (images, media) as-is without modification
+- Detects and displays a structured OOXML version string (e.g. `5.1.1`)
+- Breaks down the version into Edition, Conformance level, and Document type
+- Falls back to internal folder structure detection if content type parsing fails
 - Falls back gracefully if an XML file is malformed
 
 
-4) As a script
 
-Place your `.docx` file in the same directory as the script, then run:
+4) Usage
+
+Run the script and enter the path to your `.docx` file when prompted:
 
 ```bash
-python extract_ooxml.py
+python extract.py
 ```
 
-By default this extracts `File.docx` into a folder called `./extracted_word_structure`. Edit the last two lines of the script to change these:
+```
+==================================================
+       OOXML Extractor Tool
+==================================================
 
-```python
-extract_ooxml('your_file.docx', './your_output_folder')
+Enter the path to your .docx file:
+>
 ```
 
-5) As a module
+Then either:
+- **Type** the full path to your file, e.g. `C:\Users\User\Documents\report.docx`
+- **Drag and drop** the `.docx` file directly into the terminal window — the path will auto-fill
 
-```python
-from extract_ooxml import extract_ooxml
+The output folder is automatically named after your input file and saved in the same directory:
 
-extract_ooxml('report.docx', './output')
-```
+| Input File | Output Folder |
+|---|---|
+| `C:\Users\User\Desktop\report.docx` | `C:\Users\User\Desktop\report\` |
+| `C:\Users\User\Downloads\thesis.docx` | `C:\Users\User\Downloads\thesis\` |
 
+---
 
-
-6) Output Structure
+5) Output Structure
 
 After extraction, the output directory mirrors the internal ZIP layout of the `.docx`:
 
 ```
-extracted_word_structure/
+report/
 ├── [Content_Types].xml       # Declares all content types in the package
 ├── _rels/
 │   └── .rels                 # Top-level relationships
@@ -67,15 +81,27 @@ extracted_word_structure/
 
 > The exact contents vary depending on the features used in the document (headers, footnotes, comments, embedded objects, etc.).
 
+---
 
+6) OOXML Version Detection
 
-7) Key Files to Explore
+After extraction, the tool prints a structured version string:
 
-| File | What it contains |
-|------|-----------------|
-| `word/document.xml` | All body text, paragraphs, tables, and inline formatting |
-| `word/styles.xml` | Style definitions (Heading 1, Normal, etc.) |
-| `word/numbering.xml` | List and numbering definitions |
-| `word/_rels/document.xml.rels` | Links between the document and its resources |
-| `[Content_Types].xml` | Package manifest — lists every file and its MIME type |
+```
+==================================================
+OOXML Version : 5.1.1
+  Edition     : ECMA-376 5th / ISO/IEC 29500:2016
+  Conformance : Transitional
+  Document    : WordprocessingML (.docx)
+==================================================
+```
+
+The version string follows the format `Edition.Conformance.DocumentType`:
+
+```
+5 . 1 . 1
+│   │   └─── Document Type
+│   └─────── Conformance Level
+└─────────── ECMA-376 Edition
+```
 
