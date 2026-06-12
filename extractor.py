@@ -22,7 +22,6 @@ def get_ooxml_version(output_dir):
                 break
 
         if not content_type:
-            # Fallback: check Default tags too
             defaults = parsed.getElementsByTagName('Default')
             for default in defaults:
                 ct = default.getAttribute('ContentType')
@@ -61,7 +60,6 @@ def get_ooxml_version(output_dir):
         elif 'presentationml' in ct_lower:
             part = 3
         else:
-            # Last resort: check by file extension of docx itself
             word_dir = os.path.join(output_dir, 'word')
             ppt_dir  = os.path.join(output_dir, 'ppt')
             xl_dir   = os.path.join(output_dir, 'xl')
@@ -120,7 +118,10 @@ if __name__ == '__main__':
     print("       OOXML Extractor Tool")
     print("=" * 50)
 
-    docx_path = input("\nEnter the path to your .docx file:\n> ").strip().strip('"')
+    if len(sys.argv) >= 2:
+        docx_path = sys.argv[1].strip().strip('"')
+    else:
+        docx_path = input("> ").strip().strip('"')
 
     if not docx_path.endswith('.docx'):
         print("Error: File must be in .docx format.")
@@ -133,7 +134,6 @@ if __name__ == '__main__':
     base_name  = os.path.splitext(os.path.basename(docx_path))[0]
     output_dir = os.path.join(os.path.dirname(docx_path), base_name)
 
-    # Handle edge case where dirname returns empty string (same directory)
     if not output_dir:
         output_dir = base_name
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     extract_ooxml(docx_path, output_dir)
 
-    version     = get_ooxml_version(output_dir)
+    version      = get_ooxml_version(output_dir)
     iso_year_map = {1: '2006', 2: '2008', 3: '2011', 4: '2012', 5: '2016'}
     doc_type_map = {1: 'WordprocessingML (.docx)', 2: 'SpreadsheetML (.xlsx)', 3: 'PresentationML (.pptx)', 4: 'Other'}
     suffix_map   = {1: 'st', 2: 'nd', 3: 'rd'}
